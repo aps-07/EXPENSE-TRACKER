@@ -1,3 +1,10 @@
+from dotenv import load_dotenv
+from openai import OpenAI
+
+load_dotenv()
+
+client = OpenAI()
+
 import tkinter as aps
 import tkcalendar as asr
 import matplotlib.pyplot as mpl
@@ -6,12 +13,33 @@ next_row = 2
 
 root = aps.Tk()
 root.title("DAILY EXPENSE TRACKER")
-root.geometry("850x600+400+100")
+root.geometry("850x790+400+100")
 root["bg"] = "peach puff"
 
 date_list = []
 amount_list = []
 category_list = []
+
+
+def ask_ai():
+    prompt = f"""
+    Here is my expense data:
+
+    Dates: {date_list}
+    Amounts: {amount_list}
+    Categories: {category_list}
+
+    Analyze my expenses and tell me where I am spending the most.
+    """
+
+    response = client.responses.create(
+        model="gpt-5.6-luna",
+        input=prompt
+    )
+
+    ai_output.delete("1.0", aps.END)
+    ai_output.insert(aps.END, response.output_text)
+
 
 def add_expense():
     global next_row
@@ -137,5 +165,16 @@ category = aps.Label(root,text="CATEGORY",bg="yellow").grid(row=1,column=3,padx=
 # matploatlib
 matplot = aps.Button(root,text="SHOW GRAPH VISUALS",font=("Arial",10),background="lightgreen",command=show_graph).grid(row=20,column=2,pady=15)
 pie = aps.Button(root,text="SHOW PIE CHART",font=("Arial",10),background="lightgreen",command=show_piechart).grid(row=20,column=0,pady=15)
+
+ai_button = aps.Button(
+    root,
+    text="ASK AI",
+    command=ask_ai
+)
+
+ai_button.grid(row=20, column=3, pady=15)
+
+ai_output = aps.Text(root, height=10, width=70, wrap="word")
+ai_output.grid(row=21, column=0, columnspan=4, padx=20, pady=10)
 
 root.mainloop()
